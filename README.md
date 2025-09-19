@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🎵 GestureBeats Studio
 
 A revolutionary music creation application that allows you to create music using hand gestures! Control 6 different instruments with 6 unique gestures, record your sessions, and analyze your musical performance with advanced analytics.
@@ -252,3 +253,7 @@ GestureBeats Studio is designed to make music creation accessible and fun. Wheth
 ---
 
 *Made with ❤️ for music lovers everywhere*
+=======
+# Guesture_2_Music
+An application designed for music creation through hand gesture recognition.
+>>>>>>> 7fc883330bc77a6ce4fe56d1c8158d6643113163
