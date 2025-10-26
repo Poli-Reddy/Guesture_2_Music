@@ -1,0 +1,17 @@
+{
+  "gesture_counts": {
+    "open_palm": 7,
+    "fist": 52,
+    "thumbs_up": 1
+  },
+  "hand_usage": {
+    "left": 36,
+    "right": 24
+  },
+  "instrument_usage": {
+    "piano": 60
+  },
+  "estimated_bpm": 590.5345964104105,
+  "complexity_score": 0.05,
+  "total_events": 60
+}

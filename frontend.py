@@ -14,6 +14,7 @@ import base64
 from gesture import GestureDetector
 from music_generator import MusicGenerator
 import streamlit.components.v1 as components
+import os
 
 # Custom CSS for advanced animations and styling
 CUSTOM_CSS = """
@@ -172,198 +173,47 @@ CUSTOM_CSS = """
 </style>
 """
 
-# JavaScript for real-time audio and animations
-AUDIO_JS = """
-<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
-<script>
-    // Initialize Tone.js
-    Tone.start();
-    
-    // Create audio context and instruments
-    const instruments = {
-        piano: new Tone.Sampler({
-            urls: {
-                "C4": "https://tonejs.github.io/audio/casio/C4.mp3",
-                "D4": "https://tonejs.github.io/audio/casio/D4.mp3",
-                "E4": "https://tonejs.github.io/audio/casio/E4.mp3",
-                "F4": "https://tonejs.github.io/audio/casio/F4.mp3",
-                "G4": "https://tonejs.github.io/audio/casio/G4.mp3",
-                "A4": "https://tonejs.github.io/audio/casio/A4.mp3",
-                "B4": "https://tonejs.github.io/audio/casio/B4.mp3",
-                "C5": "https://tonejs.github.io/audio/casio/C5.mp3"
-            }
-        }).toDestination(),
-        
-        guitar: new Tone.Sampler({
-            urls: {
-                "E2": "https://tonejs.github.io/audio/guitar/E2.mp3",
-                "A2": "https://tonejs.github.io/audio/guitar/A2.mp3",
-                "D3": "https://tonejs.github.io/audio/guitar/D3.mp3",
-                "G3": "https://tonejs.github.io/audio/guitar/G3.mp3",
-                "B3": "https://tonejs.github.io/audio/guitar/B3.mp3",
-                "E4": "https://tonejs.github.io/audio/guitar/E4.mp3"
-            }
-        }).toDestination(),
-        
-        drums: new Tone.Player({
-            url: "https://tonejs.github.io/audio/drum-samples/kick.mp3"
-        }).toDestination(),
-        
-        violin: new Tone.Sampler({
-            urls: {
-                "G3": "https://tonejs.github.io/audio/violin/G3.mp3",
-                "D4": "https://tonejs.github.io/audio/violin/D4.mp3",
-                "A4": "https://tonejs.github.io/audio/violin/A4.mp3",
-                "E5": "https://tonejs.github.io/audio/violin/E5.mp3"
-            }
-        }).toDestination(),
-        
-        flute: new Tone.Sampler({
-            urls: {
-                "C5": "https://tonejs.github.io/audio/flute/C5.mp3",
-                "D5": "https://tonejs.github.io/audio/flute/D5.mp3",
-                "E5": "https://tonejs.github.io/audio/flute/E5.mp3",
-                "F5": "https://tonejs.github.io/audio/flute/F5.mp3",
-                "G5": "https://tonejs.github.io/audio/flute/G5.mp3",
-                "A5": "https://tonejs.github.io/audio/flute/A5.mp3",
-                "B5": "https://tonejs.github.io/audio/flute/B5.mp3",
-                "C6": "https://tonejs.github.io/audio/flute/C6.mp3"
-            }
-        }).toDestination(),
-        
-        saxophone: new Tone.Sampler({
-            urls: {
-                "Bb3": "https://tonejs.github.io/audio/saxophone/Bb3.mp3",
-                "C4": "https://tonejs.github.io/audio/saxophone/C4.mp3",
-                "D4": "https://tonejs.github.io/audio/saxophone/D4.mp3",
-                "F4": "https://tonejs.github.io/audio/saxophone/F4.mp3",
-                "G4": "https://tonejs.github.io/audio/saxophone/G4.mp3",
-                "A4": "https://tonejs.github.io/audio/saxophone/A4.mp3",
-                "Bb4": "https://tonejs.github.io/audio/saxophone/Bb4.mp3",
-                "C5": "https://tonejs.github.io/audio/saxophone/C5.mp3"
-            }
-        }).toDestination()
-    };
-    
-    // Gesture to note mapping
-    const gestureMapping = {
-        'peace': 0,
-        'fist': 1,
-        'open_palm': 2,
-        'thumbs_up': 3,
-        'rock_horn': 4,
-        'pinch': 5
-    };
-    
-    // Note arrays for each instrument
-    const instrumentNotes = {
-        piano: ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5'],
-        guitar: ['E2', 'A2', 'D3', 'G3', 'B3', 'E4'],
-        drums: ['kick', 'snare', 'hihat', 'crash', 'tom1', 'tom2'],
-        violin: ['G3', 'D4', 'A4', 'E5'],
-        flute: ['C5', 'D5', 'E5', 'F5', 'G5', 'A5', 'B5', 'C6'],
-        saxophone: ['Bb3', 'C4', 'D4', 'F4', 'G4', 'A4', 'Bb4', 'C5']
-    };
-    
-    // Play note function
-    function playNote(instrument, gesture, hand) {
-        const noteIndex = gestureMapping[gesture] || 0;
-        const notes = instrumentNotes[instrument];
-        const note = notes[noteIndex % notes.length];
-        
-        if (instrument === 'drums') {
-            // Play drum sound
-            instruments.drums.start();
-        } else {
-            // Play melodic instrument
-            instruments[instrument].triggerAttackRelease(note, "8n");
-        }
-        
-        // Visual feedback
-        showNoteVisualization(note, hand);
-    }
-    
-    // Show note visualization
-    function showNoteVisualization(note, hand) {
-        const container = document.getElementById('note-visualization');
-        if (container) {
-            const noteElement = document.createElement('div');
-            noteElement.className = 'note-bubble';
-            noteElement.textContent = note;
-            noteElement.style.cssText = `
-                position: absolute;
-                ${hand === 'left' ? 'left: 20px;' : 'right: 20px;'}
-                top: 50%;
-                transform: translateY(-50%);
-                background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-                color: white;
-                padding: 10px 15px;
-                border-radius: 25px;
-                font-weight: bold;
-                animation: noteFloat 2s ease-out forwards;
-                z-index: 1000;
-            `;
-            
-            container.appendChild(noteElement);
-            
-            setTimeout(() => {
-                if (noteElement.parentNode) {
-                    noteElement.parentNode.removeChild(noteElement);
-                }
-            }, 2000);
-        }
-    }
-    
-    // Add CSS for note animation
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes noteFloat {
-            0% { opacity: 1; transform: translateY(-50%) scale(0.5); }
-            50% { opacity: 1; transform: translateY(-100px) scale(1.2); }
-            100% { opacity: 0; transform: translateY(-200px) scale(0.8); }
-        }
-    `;
-    document.head.appendChild(style);
-    
-    // WebSocket connection for real-time gesture data
-    let ws = null;
-    function connectWebSocket() {
-        ws = new WebSocket('ws://localhost:8765');
-        
-        ws.onopen = function() {
-            console.log('WebSocket connected');
-        };
-        
-        ws.onmessage = function(event) {
-            const data = JSON.parse(event.data);
-            if (data.gestures) {
-                // Process gesture data and play notes
-                for (const [hand, info] of Object.entries(data.gestures)) {
-                    if (info && info.gesture && info.confidence > 0.7) {
-                        const instrument = hand === 'left' ? 'piano' : 'guitar'; // Default instruments
-                        playNote(instrument, info.gesture, hand);
-                    }
-                }
-            }
-        };
-        
-        ws.onclose = function() {
-            console.log('WebSocket disconnected');
-            setTimeout(connectWebSocket, 1000); // Reconnect after 1 second
-        };
-    }
-    
-    // Connect when page loads
-    connectWebSocket();
-</script>
-"""
-
 class GestureBeatsFrontend:
     def __init__(self):
-        self.gesture_detector = GestureDetector()
-        self.music_generator = MusicGenerator()
+        self.websocket_uri = "ws://localhost:8765"
+        if 'gesture_detector' not in st.session_state:
+            st.session_state.gesture_detector = GestureDetector()
+        self.gesture_detector = st.session_state.gesture_detector
+
+        if 'music_generator' not in st.session_state:
+            st.session_state.music_generator = MusicGenerator()
+        self.music_generator = st.session_state.music_generator
+
+        if 'is_running' not in st.session_state:
+            st.session_state.is_running = False
+        if 'is_recording' not in st.session_state:
+            st.session_state.is_recording = False
+
+        # Video processing thread
+        self.video_thread = None
         self.video_queue = queue.Queue(maxsize=10)
-        self.is_running = False
+        self.stop_video = threading.Event()
+
+    async def _send_websocket_message(self, message_type, data={}):
+        try:
+            async with websockets.connect(self.websocket_uri) as websocket:
+                message = {
+                    "type": message_type,
+                    "data": data
+                }
+                await websocket.send(json.dumps(message))
+        except Exception as e:
+            st.error(f"Failed to send websocket message: {e}")
+
+    def send_websocket_message(self, message_type, data={}):
+        # Use asyncio.run only if no event loop is running
+        try:
+            asyncio.get_running_loop()
+            # If there's a running loop, create a task
+            asyncio.create_task(self._send_websocket_message(message_type, data))
+        except RuntimeError:
+            # No running loop, safe to use asyncio.run
+            asyncio.run(self._send_websocket_message(message_type, data))
         
     def setup_page_config(self):
         """Configure Streamlit page settings"""
@@ -373,23 +223,18 @@ class GestureBeatsFrontend:
             layout="wide",
             initial_sidebar_state="expanded"
         )
-        
-        # Inject custom CSS
         st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
-        
-        # Inject JavaScript for audio
-        st.markdown(AUDIO_JS, unsafe_allow_html=True)
     
     def create_header(self):
         """Create animated header"""
         st.markdown("""
         <div class="gesture-container" style="text-align: center; margin-bottom: 30px;">
-            <h1 style="font-family: 'Orbitron', monospace; font-size: 3em; font-weight: 900; 
+            <h1 style="font-family: 'Orbitron', monospace; font-size: 3em; font-weight: 900;
                        color: #00ffff; text-shadow: 0 0 20px #00ffff; margin: 0;">
                 🎵 GestureBeats Studio 🎵
             </h1>
             <p style="font-size: 1.2em; color: #ffffff; margin: 10px 0;">
-                Create music with your hands • Real-time gesture recognition • 6 instruments
+                Create music with your hands • Real-time gesture recognition • 6 instruments at the left corner menu
             </p>
         </div>
         """, unsafe_allow_html=True)
@@ -397,199 +242,209 @@ class GestureBeatsFrontend:
     def create_video_section(self):
         """Create video display section with real-time gesture detection"""
         st.markdown("### 🎥 Live Camera Feed")
-        
-        # Create video container
+
+        # Camera size adjustment
+        camera_size = st.slider("Camera Size", 0.3, 1.0, 0.6, 0.1, key="camera_size")
+
         video_placeholder = st.empty()
-        
-        # Add note visualization container
-        st.markdown('<div id="note-visualization" style="position: relative; height: 100px;"></div>', 
-                   unsafe_allow_html=True)
-        
-        # Camera controls
+
         col1, col2, col3 = st.columns(3)
-        
+
         with col1:
             if st.button("🎬 Start Camera", key="start_camera"):
-                self.start_camera()
-        
+                st.session_state.is_running = True
+                self.start_video_thread()
+
         with col2:
             if st.button("⏹️ Stop Camera", key="stop_camera"):
-                self.stop_camera()
-        
+                st.session_state.is_running = False
+                self.stop_video_thread()
+                if st.session_state.is_recording:
+                    self.music_generator.stop_recording()
+                    st.session_state.is_recording = False
+                    st.success("Recording stopped. Check playlist for saved audio.")
+
         with col3:
-            camera_status = "🟢 Running" if self.is_running else "🔴 Stopped"
+            camera_status = "🟢 Running" if st.session_state.is_running else "🔴 Stopped"
             st.markdown(f"**Status:** {camera_status}")
-        
-        # Video processing loop
-        if self.is_running:
-            self.process_video_feed(video_placeholder)
+
+        if st.session_state.is_running:
+            self.update_video_feed(video_placeholder, camera_size)
     
-    def start_camera(self):
-        """Start camera capture"""
-        self.is_running = True
-        # Start audio playback
-        self.music_generator.start_audio_playback()
-        st.success("Camera started! Make gestures to create music!")
-    
-    def stop_camera(self):
-        """Stop camera capture"""
-        self.is_running = False
-        # Stop audio playback
-        self.music_generator.stop_audio_playback()
-        st.info("Camera stopped.")
-    
-    def process_video_feed(self, placeholder):
-        """Process video feed with gesture detection"""
+    def start_video_thread(self):
+        """Start video processing in a separate thread"""
+        if self.video_thread and self.video_thread.is_alive():
+            return
+
+        self.stop_video.clear()
+        self.video_thread = threading.Thread(target=self._video_processing_loop, daemon=True)
+        self.video_thread.start()
+
+    def stop_video_thread(self):
+        """Stop video processing thread"""
+        self.stop_video.set()
+        if self.video_thread:
+            self.video_thread.join(timeout=2)
+
+    def _video_processing_loop(self):
+        """Video processing loop running in separate thread"""
         cap = cv2.VideoCapture(0)
-        
-        # Set camera properties for consistent frame size
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         cap.set(cv2.CAP_PROP_FPS, 30)
-        
+
         try:
-            while self.is_running:
+            while not self.stop_video.is_set():
                 ret, frame = cap.read()
                 if not ret:
-                    st.warning("Failed to read from camera. Please check camera connection.")
-                    break
-                
-                # Ensure frame has correct dimensions
-                if frame is None or frame.size == 0:
+                    time.sleep(0.1)
                     continue
-                
-                # Process frame for gesture detection
+
+                annotated_frame, hand_info = self.gesture_detector.process_frame(frame)
+
+                if hand_info.get('left') or hand_info.get('right'):
+                    self.send_websocket_message("gesture_data", hand_info)
+                    # Process gestures for music generation
+                    self.music_generator.process_gesture(hand_info)
+
+                # Put frame in queue for UI update
                 try:
-                    annotated_frame, hand_info = self.gesture_detector.process_frame(frame)
-                    
-                    # Process music generation with error handling
+                    self.video_queue.put_nowait(annotated_frame)
+                except queue.Full:
+                    # Remove old frame if queue is full
                     try:
-                        music_events = self.music_generator.process_gesture(hand_info)
-                    except Exception as music_error:
-                        st.warning(f"Music generation error: {music_error}")
-                        music_events = []
-                    
-                    # Convert frame for display
-                    annotated_frame_rgb = cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB)
-                    
-                    # Display frame
-                    placeholder.image(annotated_frame_rgb, channels="RGB", use_container_width=True)
-                    
-                except Exception as gesture_error:
-                    st.warning(f"Gesture detection error: {gesture_error}")
-                    # Display original frame if gesture detection fails
-                    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                    placeholder.image(frame_rgb, channels="RGB", use_container_width=True)
-                
-                # Small delay to prevent overwhelming the UI
+                        self.video_queue.get_nowait()
+                        self.video_queue.put_nowait(annotated_frame)
+                    except queue.Empty:
+                        pass
+
                 time.sleep(0.033)  # ~30 FPS
-                
-        except Exception as e:
-            st.error(f"Camera error: {e}")
         finally:
             cap.release()
-    
+
+    def update_video_feed(self, placeholder, camera_size=0.6):
+        """Update video feed from queue"""
+        try:
+            frame = self.video_queue.get_nowait()
+            # Resize frame based on camera_size
+            height, width = frame.shape[:2]
+            new_width = int(width * camera_size)
+            new_height = int(height * camera_size)
+            resized_frame = cv2.resize(frame, (new_width, new_height))
+            placeholder.image(resized_frame, channels="BGR", use_container_width=False)
+        except queue.Empty:
+            pass
+
     def create_instrument_controls(self):
         """Create instrument selection and control panels"""
-        st.markdown("### 🎛️ Instrument Controls")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.markdown("#### 🖐️ Left Hand")
-            left_instrument = st.selectbox(
-                "Select Instrument",
-                options=list(self.music_generator.instruments.keys()),
-                format_func=lambda x: self.music_generator.instruments[x]['name'],
-                key="left_instrument"
-            )
+        with st.expander("🎛️ Instrument Controls", expanded=True):
+            col1, col2 = st.columns(2)
             
-            left_volume = st.slider(
-                "Volume", 0.0, 1.0, 0.7, 0.1,
-                key="left_volume"
-            )
-            
-            self.music_generator.set_instrument('left', left_instrument)
-            self.music_generator.set_volume('left', left_volume)
-        
-        with col2:
-            st.markdown("#### 🖐️ Right Hand")
-            right_instrument = st.selectbox(
-                "Select Instrument",
-                options=list(self.music_generator.instruments.keys()),
-                format_func=lambda x: self.music_generator.instruments[x]['name'],
-                key="right_instrument"
-            )
-            
-            right_volume = st.slider(
-                "Volume", 0.0, 1.0, 0.7, 0.1,
-                key="right_volume"
-            )
-            
-            self.music_generator.set_instrument('right', right_instrument)
-            self.music_generator.set_volume('right', right_volume)
+            with col1:
+                st.markdown("#### 🖐️ Left Hand")
+                left_instrument = st.selectbox(
+                    "Select Instrument",
+                    options=['piano', 'guitar', 'drums', 'violin', 'flute', 'saxophone'],
+                    key="left_instrument"
+                )
+                self.music_generator.set_instrument("left", left_instrument)
+
+                left_volume = st.slider("Volume", 0.0, 1.0, 0.7, 0.1, key="left_volume")
+                self.music_generator.set_volume("left", left_volume)
+
+            with col2:
+                st.markdown("#### 🖐️ Right Hand")
+                right_instrument = st.selectbox(
+                    "Select Instrument",
+                    options=['piano', 'guitar', 'drums', 'violin', 'flute', 'saxophone'],
+                    key="right_instrument"
+                )
+                self.music_generator.set_instrument("right", right_instrument)
+
+                right_volume = st.slider("Volume", 0.0, 1.0, 0.7, 0.1, key="right_volume")
+                self.music_generator.set_volume("right", right_volume)
     
     def create_audio_controls(self):
         """Create audio effect and tempo controls"""
-        st.markdown("### 🎚️ Audio Controls")
-        
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            st.markdown("#### 🎵 Tempo")
-            tempo = st.slider(
-                "BPM", 60, 200, 120, 5,
-                key="tempo"
-            )
-            self.music_generator.set_tempo(tempo)
-        
-        with col2:
-            st.markdown("#### 🎛️ Effects")
-            reverb = st.checkbox("Reverb", key="reverb")
-            delay = st.checkbox("Delay", key="delay")
-            distortion = st.checkbox("Distortion", key="distortion")
+        with st.expander("🎚️ Audio Controls", expanded=True):
+            col1, col2, col3 = st.columns(3)
             
-            self.music_generator.set_effect('reverb', reverb)
-            self.music_generator.set_effect('delay', delay)
-            self.music_generator.set_effect('distortion', distortion)
-        
-        with col3:
-            st.markdown("#### 🎤 Sensitivity")
-            sensitivity = st.slider(
-                "Gesture Sensitivity", 0.5, 0.9, 0.7, 0.05,
-                key="sensitivity"
-            )
-            self.gesture_detector.confidence_threshold = sensitivity
+            with col1:
+                st.markdown("#### 🎵 Tempo")
+                tempo = st.slider("BPM", 60, 200, 120, 5, key="tempo")
+                self.music_generator.set_tempo(tempo)
+            
+            with col2:
+                st.markdown("#### 🎛️ Effects")
+                reverb = st.checkbox("Reverb", key="reverb")
+                self.music_generator.set_effect("reverb", reverb)
+                delay = st.checkbox("Delay", key="delay")
+                self.music_generator.set_effect("delay", delay)
+                distortion = st.checkbox("Distortion", key="distortion")
+                self.music_generator.set_effect("distortion", distortion)
+            
+            with col3:
+                st.markdown("#### 🎤 Sensitivity")
+                sensitivity = st.slider("Gesture Sensitivity", 0.5, 0.9, 0.7, 0.05, key="sensitivity")
+                self.gesture_detector.confidence_threshold = sensitivity
     
     def create_recording_section(self):
         """Create recording and playback controls"""
-        st.markdown("### 🎙️ Recording & Playback")
-        
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            if st.button("🔴 Start Recording", key="start_recording"):
+        with st.expander("🎙️ Recording Controls", expanded=True):
+            start_recording_disabled = not st.session_state.is_running or st.session_state.is_recording
+            if st.button("🔴 Start Recording", key="start_recording", disabled=start_recording_disabled):
                 self.music_generator.start_recording()
+                st.session_state.is_recording = True
                 st.success("Recording started!")
-        
-        with col2:
-            if st.button("⏹️ Stop Recording", key="stop_recording"):
-                result = self.music_generator.stop_recording()
-                if result:
-                    st.success(f"Session saved: {result[0]}")
-                else:
-                    st.warning("No audio data to save")
-        
-        with col3:
-            recording_status = "🔴 Recording" if self.music_generator.is_recording else "⏹️ Stopped"
+
+            if st.session_state.is_recording:
+                if st.button("⏹️ Stop Recording", key="stop_recording"):
+                    self.music_generator.stop_recording()
+                    st.session_state.is_recording = False
+                    st.success("Recording stopped. Check playlist for saved audio.")
+
+            recording_status = "🔴 Recording" if st.session_state.is_recording else "⏹️ Stopped"
             st.markdown(f"**Status:** {recording_status}")
-    
+
+    def create_playlist_section(self):
+        """Create a playlist of recorded audio files."""
+        st.markdown("### 🎶 Your Recordings")
+        
+        recordings_dir = "recordings"
+        if not os.path.exists(recordings_dir):
+            os.makedirs(recordings_dir)
+            
+        audio_files = [f for f in os.listdir(recordings_dir) if f.endswith('.wav')]
+        
+        if st.button("🔄 Refresh Playlist"):
+            pass
+            
+        if not audio_files:
+            st.info("No recordings found yet. Start recording to create your first track!")
+        else:
+            for audio_file in sorted(audio_files, reverse=True):
+                st.markdown(f"**{audio_file}**")
+                audio_path = os.path.join(recordings_dir, audio_file)
+                try:
+                    with open(audio_path, 'rb') as f:
+                        st.audio(f.read(), format='audio/wav')
+                except Exception as e:
+                    st.error(f"Could not play file {audio_file}. Error: {e}")
+
     def create_analysis_dashboard(self):
         """Create music analysis dashboard"""
         st.markdown("### 📊 Music Analysis")
+        recordings_dir = "recordings"
+        stats_files = [f for f in os.listdir(recordings_dir) if f.endswith('_stats.json')]
+
+        if not stats_files:
+            st.info("No analysis data found. Record a session to generate analysis.")
+            return
+
+        latest_stats_file = max(stats_files, key=lambda f: os.path.getmtime(os.path.join(recordings_dir, f)))
         
-        # Get session statistics
-        stats = self.music_generator.get_session_stats()
+        with open(os.path.join(recordings_dir, latest_stats_file), 'r') as f:
+            stats = json.load(f)
         
         if stats:
             col1, col2, col3, col4 = st.columns(4)
@@ -613,139 +468,41 @@ class GestureBeatsFrontend:
                 else:
                     st.metric("Left Hand Usage", "0%")
             
-            # Gesture frequency chart
             if stats.get('gesture_counts'):
                 st.markdown("#### Gesture Frequency")
                 gesture_data = stats['gesture_counts']
                 
-                fig = px.bar(
-                    x=list(gesture_data.keys()),
-                    y=list(gesture_data.values()),
-                    title="Gesture Usage",
-                    color=list(gesture_data.values()),
-                    color_continuous_scale="viridis"
-                )
-                fig.update_layout(
-                    xaxis_title="Gesture",
-                    yaxis_title="Count",
-                    showlegend=False
-                )
+                fig = px.bar(x=list(gesture_data.keys()), y=list(gesture_data.values()), title="Gesture Usage")
                 st.plotly_chart(fig, use_container_width=True)
-            
-            # Hand usage pie chart
-            if stats.get('hand_usage'):
-                st.markdown("#### Hand Usage Distribution")
-                hand_data = stats['hand_usage']
-                
-                fig = px.pie(
-                    values=list(hand_data.values()),
-                    names=list(hand_data.keys()),
-                    title="Left vs Right Hand Usage"
-                )
-                st.plotly_chart(fig, use_container_width=True)
-        
-        else:
-            st.info("No session data available. Start recording to see analysis!")
-    
+
     def create_tutorial_section(self):
         """Create interactive tutorial section"""
-        st.markdown("### 🎓 Interactive Tutorials")
-        
-        tutorial_options = [
-            "Piano Basics",
-            "Guitar Rhythms", 
-            "Drum Patterns",
-            "String Ensemble"
-        ]
-        
-        selected_tutorial = st.selectbox(
-            "Select Tutorial",
-            tutorial_options,
-            key="tutorial_select"
-        )
-        
-        if selected_tutorial == "Piano Basics":
-            st.markdown("""
-            #### 🎹 Piano Basics Tutorial
-            - **Peace ✌️**: Play C4 note
-            - **Fist ✊**: Play D4 note  
-            - **Open Palm ✋**: Play E4 note
-            - **Thumbs Up 👍**: Play F4 note
-            - **Rock Horn 🤘**: Play G4 note
-            - **Pinch 🤏**: Play A4 note
-            
-            Try making these gestures with your left hand to play piano notes!
-            """)
-        
-        elif selected_tutorial == "Guitar Rhythms":
-            st.markdown("""
-            #### 🎸 Guitar Rhythms Tutorial
-            - **Peace ✌️**: Play E2 (low E string)
-            - **Fist ✊**: Play A2 (A string)
-            - **Open Palm ✋**: Play D3 (D string)
-            - **Thumbs Up 👍**: Play G3 (G string)
-            - **Rock Horn 🤘**: Play B3 (B string)
-            - **Pinch 🤏**: Play E4 (high E string)
-            
-            Use your right hand to strum different guitar strings!
-            """)
-        
-        elif selected_tutorial == "Drum Patterns":
-            st.markdown("""
-            #### 🥁 Drum Patterns Tutorial
-            - **Peace ✌️**: Kick drum
-            - **Fist ✊**: Snare drum
-            - **Open Palm ✋**: Hi-hat
-            - **Thumbs Up 👍**: Crash cymbal
-            - **Rock Horn 🤘**: Tom 1
-            - **Pinch 🤏**: Tom 2
-            
-            Create drum patterns with both hands!
-            """)
-        
-        elif selected_tutorial == "String Ensemble":
-            st.markdown("""
-            #### 🎻 String Ensemble Tutorial
-            - **Left Hand**: Violin (G3, D4, A4, E5)
-            - **Right Hand**: Cello (C3, G3, D4, A4)
-            
-            Use both hands to create beautiful string harmonies!
-            """)
-    
+        with st.expander("🎓 Interactive Tutorials"):
+            st.info("Tutorials are currently disabled.")
+
     def run(self):
         """Main application runner"""
         self.setup_page_config()
         self.create_header()
         
-        # Sidebar controls
         with st.sidebar:
-            st.markdown("### 🎛️ Control Panel")
+            st.markdown("## 🎛️ Control Panel (6 instruments)")
             self.create_instrument_controls()
-            st.markdown("---")
             self.create_audio_controls()
-            st.markdown("---")
             self.create_recording_section()
-        
-        # Main content area
-        col1, col2 = st.columns([2, 1])
-        
-        with col1:
-            self.create_video_section()
-        
-        with col2:
             self.create_tutorial_section()
-        
-        # Analysis dashboard
+
+        self.create_video_section()
+
         st.markdown("---")
-        self.create_analysis_dashboard()
         
-        # Footer
-        st.markdown("""
-        <div style="text-align: center; margin-top: 50px; color: #ffffff; opacity: 0.7;">
-            <p>🎵 GestureBeats Studio - Create music with your hands 🎵</p>
-            <p>Powered by MediaPipe, Tone.js, and Streamlit</p>
-        </div>
-        """, unsafe_allow_html=True)
+        col1, col2 = st.columns(2)
+        with col1:
+            self.create_playlist_section()
+        with col2:
+            self.create_analysis_dashboard()
+        
+        st.markdown("---<div style='text-align: center; margin-top: 50px; color: #ffffff; opacity: 0.7;'><p>🎵 GestureBeats Studio - Create music with your hands 🎵</p><p>Powered by MediaPipe and Streamlit</p></div>", unsafe_allow_html=True)
 
 def main():
     """Main function to run the application"""

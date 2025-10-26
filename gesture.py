@@ -25,7 +25,8 @@ class GestureDetector:
         
         self.confidence_threshold = confidence_threshold
         self.smoothing_frames = smoothing_frames
-        self.gesture_history = deque(maxlen=smoothing_frames)
+        self.left_gesture_history = deque(maxlen=smoothing_frames)
+        self.right_gesture_history = deque(maxlen=smoothing_frames)
         
         # Gesture definitions
         self.gestures = {
@@ -61,76 +62,172 @@ class GestureDetector:
         """Calculate Euclidean distance between two points"""
         return np.sqrt(np.sum((p1 - p2) ** 2))
     
-    def _is_finger_extended(self, landmarks, finger_tips, finger_pips):
-        """Check if a finger is extended based on landmark positions"""
-        extended = []
-        for tip, pip in zip(finger_tips, finger_pips):
-            # Check if tip is higher than pip (considering y-axis is inverted)
-            if landmarks[tip][1] < landmarks[pip][1]:
-                extended.append(True)
-            else:
-                extended.append(False)
-        return extended
+    def _is_finger_extended(self, landmarks):
+        """Check which fingers are extended with improved accuracy"""
+        # Landmark indices for MediaPipe hand model
+        # 0: wrist, 1-4: thumb, 5-8: index, 9-12: middle, 13-16: ring, 17-20: pinky
+        
+        extended_fingers = []
+        
+        # Thumb (special case - compare x-coordinates for horizontal extension)
+        # Check if thumb tip is further from wrist than thumb IP joint
+        thumb_tip = landmarks[4]
+        thumb_ip = landmarks[3]
+        thumb_mcp = landmarks[2]
+        wrist = landmarks[0]
+        
+        # For thumb, check horizontal distance from wrist center
+        thumb_extended = abs(thumb_tip[0] - wrist[0]) > abs(thumb_ip[0] - wrist[0])
+        extended_fingers.append(thumb_extended)
+        
+        # Other fingers (index, middle, ring, pinky)
+        # Compare tip y-coordinate with PIP joint y-coordinate
+        finger_tips = [8, 12, 16, 20]  # Index, Middle, Ring, Pinky tips
+        finger_pips = [6, 10, 14, 18]  # Index, Middle, Ring, Pinky PIP joints
+        finger_mcps = [5, 9, 13, 17]   # Index, Middle, Ring, Pinky MCP joints
+        
+        for tip_idx, pip_idx, mcp_idx in zip(finger_tips, finger_pips, finger_mcps):
+            tip = landmarks[tip_idx]
+            pip = landmarks[pip_idx]
+            mcp = landmarks[mcp_idx]
+            
+            # Finger is extended if tip is above PIP and the angle is reasonable
+            # Also check that tip is above MCP for better accuracy
+            finger_extended = (tip[1] < pip[1]) and (tip[1] < mcp[1])
+            
+            # Additional check: ensure reasonable finger straightness
+            # The tip should be reasonably aligned with the finger direction
+            tip_to_pip_dist = self._calculate_distance(tip, pip)
+            pip_to_mcp_dist = self._calculate_distance(pip, mcp)
+            
+            # If the distances are too small, finger might be curled
+            if tip_to_pip_dist < 0.02 or pip_to_mcp_dist < 0.02:
+                finger_extended = False
+            
+            extended_fingers.append(finger_extended)
+        
+        return extended_fingers
     
     def _detect_peace(self, landmarks):
-        """Detect peace sign (index and middle finger extended)"""
-        # Landmark indices for finger tips and PIPs
-        finger_tips = [4, 8, 12, 16, 20]  # Thumb, Index, Middle, Ring, Pinky
-        finger_pips = [3, 6, 10, 14, 18]  # PIP joints
+        """Detect peace sign (index and middle finger extended, others folded)"""
+        extended = self._is_finger_extended(landmarks)
         
-        extended = self._is_finger_extended(landmarks, finger_tips, finger_pips)
+        # Peace sign: index (1) and middle (2) extended, thumb (0), ring (3), pinky (4) not extended
+        peace_pattern = not extended[0] and extended[1] and extended[2] and not extended[3] and not extended[4]
         
-        # Peace sign: index and middle extended, others not
-        if extended[1] and extended[2] and not extended[0] and not extended[3] and not extended[4]:
-            return 0.9
+        if peace_pattern:
+            # Additional verification: check finger separation
+            index_tip = landmarks[8]
+            middle_tip = landmarks[12]
+            finger_separation = self._calculate_distance(index_tip, middle_tip)
+            
+            # Fingers should be reasonably separated for peace sign
+            if 0.03 < finger_separation < 0.15:
+                return 0.95
+            else:
+                return 0.7
+        
         return 0.0
     
     def _detect_fist(self, landmarks):
         """Detect closed fist (all fingers curled)"""
-        finger_tips = [4, 8, 12, 16, 20]
-        finger_pips = [3, 6, 10, 14, 18]
+        extended = self._is_finger_extended(landmarks)
         
-        extended = self._is_finger_extended(landmarks, finger_tips, finger_pips)
-        
-        # Fist: no fingers extended
+        # Fist: no fingers should be extended
         if not any(extended):
-            return 0.9
+            # Additional check: verify knuckles are higher than fingertips
+            fingertips = [4, 8, 12, 16, 20]
+            knuckles = [2, 5, 9, 13, 17]  # MCP joints
+            
+            fingers_curled = 0
+            for tip_idx, knuckle_idx in zip(fingertips[1:], knuckles[1:]):  # Skip thumb
+                if landmarks[knuckle_idx][1] < landmarks[tip_idx][1]:  # Knuckle higher than tip
+                    fingers_curled += 1
+            
+            if fingers_curled >= 3:  # At least 3 fingers clearly curled
+                return 0.95
+            else:
+                return 0.8
+        
+        # Partial fist (only thumb extended is still considered fist-like)
+        elif extended[0] and not any(extended[1:]):
+            return 0.6
+        
         return 0.0
     
     def _detect_open_palm(self, landmarks):
-        """Detect open palm (all fingers extended)"""
-        finger_tips = [4, 8, 12, 16, 20]
-        finger_pips = [3, 6, 10, 14, 18]
-        
-        extended = self._is_finger_extended(landmarks, finger_tips, finger_pips)
+        """Detect open palm (all fingers extended and spread)"""
+        extended = self._is_finger_extended(landmarks)
         
         # Open palm: all fingers extended
         if all(extended):
-            return 0.9
+            # Additional verification: check finger spread
+            fingertips = [4, 8, 12, 16, 20]  # Thumb, Index, Middle, Ring, Pinky
+            finger_distances = []
+            
+            for i in range(len(fingertips) - 1):
+                dist = self._calculate_distance(landmarks[fingertips[i]], landmarks[fingertips[i + 1]])
+                finger_distances.append(dist)
+            
+            avg_separation = np.mean(finger_distances)
+            
+            # Fingers should be reasonably spread apart
+            if avg_separation > 0.04:
+                return 0.95
+            else:
+                return 0.75  # Fingers extended but not spread
+        
         return 0.0
     
     def _detect_thumbs_up(self, landmarks):
-        """Detect thumbs up (only thumb extended)"""
-        finger_tips = [4, 8, 12, 16, 20]
-        finger_pips = [3, 6, 10, 14, 18]
+        """Detect thumbs up (only thumb extended, others folded)"""
+        extended = self._is_finger_extended(landmarks)
         
-        extended = self._is_finger_extended(landmarks, finger_tips, finger_pips)
+        # Thumbs up: only thumb extended, all others folded
+        thumbs_up_pattern = extended[0] and not any(extended[1:])
         
-        # Thumbs up: only thumb extended
-        if extended[0] and not any(extended[1:]):
-            return 0.9
+        if thumbs_up_pattern:
+            # Additional verification: thumb should be pointing upward
+            thumb_tip = landmarks[4]
+            thumb_mcp = landmarks[2]
+            wrist = landmarks[0]
+            
+            # Thumb tip should be higher than thumb MCP and wrist
+            thumb_upward = thumb_tip[1] < thumb_mcp[1] and thumb_tip[1] < wrist[1]
+            
+            # Check thumb angle - should be roughly vertical
+            thumb_angle = abs(thumb_tip[0] - thumb_mcp[0]) / abs(thumb_tip[1] - thumb_mcp[1] + 0.001)
+            
+            if thumb_upward and thumb_angle < 1.0:  # More vertical than horizontal
+                return 0.95
+            else:
+                return 0.7
+        
         return 0.0
     
     def _detect_rock_horn(self, landmarks):
-        """Detect rock horn (index and pinky extended)"""
-        finger_tips = [4, 8, 12, 16, 20]
-        finger_pips = [3, 6, 10, 14, 18]
+        """Detect rock horn (index and pinky extended, others folded)"""
+        extended = self._is_finger_extended(landmarks)
         
-        extended = self._is_finger_extended(landmarks, finger_tips, finger_pips)
+        # Rock horn: index (1) and pinky (4) extended, thumb (0), middle (2), ring (3) folded
+        rock_pattern = not extended[0] and extended[1] and not extended[2] and not extended[3] and extended[4]
         
-        # Rock horn: index and pinky extended, others not
-        if extended[1] and extended[4] and not extended[0] and not extended[2] and not extended[3]:
-            return 0.9
+        if rock_pattern:
+            # Additional verification: check that middle and ring are clearly folded
+            middle_tip = landmarks[12]
+            ring_tip = landmarks[16]
+            middle_pip = landmarks[10]
+            ring_pip = landmarks[14]
+            
+            # Middle and ring tips should be below their PIP joints
+            middle_folded = middle_tip[1] > middle_pip[1]
+            ring_folded = ring_tip[1] > ring_pip[1]
+            
+            if middle_folded and ring_folded:
+                return 0.95
+            else:
+                return 0.75
+        
         return 0.0
     
     def _detect_pinch(self, landmarks):
@@ -140,9 +237,22 @@ class GestureDetector:
         
         distance = self._calculate_distance(thumb_tip, index_tip)
         
+        # Check if other fingers are extended or folded
+        extended = self._is_finger_extended(landmarks)
+        
         # Pinch: thumb and index very close
-        if distance < 0.05:  # Threshold for pinch detection
-            return 0.9
+        if distance < 0.04:  # Adjusted threshold for better accuracy
+            # Better pinch if other fingers are extended (classic pinch gesture)
+            if extended[2] and extended[3] and extended[4]:  # Middle, ring, pinky extended
+                return 0.95
+            # Still a pinch if other fingers are folded
+            elif not extended[2] and not extended[3] and not extended[4]:
+                return 0.85
+            else:
+                return 0.7
+        elif distance < 0.06:  # Near pinch
+            return 0.5
+        
         return 0.0
     
     def _detect_gesture(self, landmarks):
@@ -152,33 +262,46 @@ class GestureDetector:
         
         for gesture_name, detector_func in self.gestures.items():
             confidence = detector_func(landmarks)
-            if confidence > best_confidence:
+            if confidence > best_confidence and confidence > 0.5:  # Minimum confidence threshold
                 best_confidence = confidence
                 best_gesture = gesture_name
         
         return best_gesture, best_confidence
     
-    def _smooth_gesture(self, gesture, confidence):
-        """Apply smoothing to prevent gesture flickering"""
-        self.gesture_history.append((gesture, confidence))
-        
-        if len(self.gesture_history) < self.smoothing_frames:
+    def _smooth_gesture(self, gesture, confidence, hand_label):
+        """Apply smoothing to prevent gesture flickering per hand"""
+        if hand_label == 'left':
+            history = self.left_gesture_history
+        else:
+            history = self.right_gesture_history
+
+        history.append((gesture, confidence))
+
+        if len(history) < self.smoothing_frames:
             return gesture, confidence
-        
-        # Count occurrences of each gesture in recent history
-        gesture_counts = {}
-        for g, c in self.gesture_history:
-            if g is not None:
-                gesture_counts[g] = gesture_counts.get(g, 0) + 1
-        
-        if not gesture_counts:
+
+        # Count occurrences of each gesture in recent history with confidence weighting
+        gesture_scores = {}
+        for g, c in history:
+            if g is not None and c > 0.5:
+                gesture_scores[g] = gesture_scores.get(g, 0) + c
+
+        if not gesture_scores:
             return None, 0.0
-        
-        # Return most frequent gesture
-        most_common = max(gesture_counts, key=gesture_counts.get)
-        avg_confidence = np.mean([c for g, c in self.gesture_history if g == most_common])
-        
-        return most_common, avg_confidence
+
+        # Return gesture with highest weighted score
+        best_gesture = max(gesture_scores, key=gesture_scores.get)
+
+        # Calculate average confidence for the best gesture
+        confidence_values = [c for g, c in history if g == best_gesture]
+        avg_confidence = np.mean(confidence_values) if confidence_values else 0.0
+
+        # Only return if it appears in majority of recent frames
+        gesture_count = sum(1 for g, c in history if g == best_gesture and c > 0.5)
+        if gesture_count >= self.smoothing_frames // 2:
+            return best_gesture, avg_confidence
+        else:
+            return None, 0.0
     
     def process_frame(self, frame):
         """Process a single frame and return annotated frame with gesture info"""
@@ -207,7 +330,7 @@ class GestureDetector:
                 
                 # Detect gesture
                 gesture, confidence = self._detect_gesture(landmarks)
-                gesture, confidence = self._smooth_gesture(gesture, confidence)
+                gesture, confidence = self._smooth_gesture(gesture, confidence, hand_label)
                 
                 if confidence >= self.confidence_threshold:
                     self.current_gestures[hand_label] = gesture

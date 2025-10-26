@@ -38,13 +38,13 @@ class MusicGenerator:
                 'name': '🎹 Piano',
                 'notes': ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5'],
                 'waveform': 'sine',
-                'adsr': {'attack': 0.1, 'decay': 0.2, 'sustain': 0.7, 'release': 0.8}
+                'adsr': {'attack': 0.01, 'decay': 0.2, 'sustain': 0.5, 'release': 0.2}
             },
             'guitar': {
                 'name': '🎸 Guitar',
                 'notes': ['E2', 'A2', 'D3', 'G3', 'B3', 'E4'],
                 'waveform': 'sawtooth',
-                'adsr': {'attack': 0.05, 'decay': 0.3, 'sustain': 0.6, 'release': 1.0}
+                'adsr': {'attack': 0.05, 'decay': 0.3, 'sustain': 0.6, 'release': 0.5}
             },
             'drums': {
                 'name': '🥁 Drums',
@@ -56,7 +56,7 @@ class MusicGenerator:
                 'name': '🎻 Violin',
                 'notes': ['G3', 'D4', 'A4', 'E5'],
                 'waveform': 'sine',
-                'adsr': {'attack': 0.2, 'decay': 0.1, 'sustain': 0.8, 'release': 1.5}
+                'adsr': {'attack': 0.2, 'decay': 0.1, 'sustain': 0.8, 'release': 0.5}
             },
             'flute': {
                 'name': '🎵 Flute',
@@ -68,7 +68,7 @@ class MusicGenerator:
                 'name': '🎷 Saxophone',
                 'notes': ['Bb3', 'C4', 'D4', 'F4', 'G4', 'A4', 'Bb4', 'C5'],
                 'waveform': 'sawtooth',
-                'adsr': {'attack': 0.15, 'decay': 0.2, 'sustain': 0.7, 'release': 1.2}
+                'adsr': {'attack': 0.15, 'decay': 0.2, 'sustain': 0.7, 'release': 0.4}
             }
         }
         
@@ -188,10 +188,8 @@ class MusicGenerator:
     def generate_tone(self, frequency, duration, waveform='sine', adsr=None, volume=1.0):
         """Generate a tone with specified parameters"""
         if adsr is None:
-            adsr = {'attack': 0.1, 'decay': 0.2, 'sustain': 0.7, 'release': 0.8}
+            adsr = {'attack': 0.01, 'decay': 0.1, 'sustain': 0.5, 'release': 0.2}
         
-        # Use consistent duration to prevent shape issues
-        duration = 0.5  # Fixed 0.5 seconds
         samples = int(duration * self.sample_rate)
         t = np.linspace(0, duration, samples, False)
         
@@ -211,82 +209,56 @@ class MusicGenerator:
         envelope = self._apply_adsr(samples, adsr)
         wave_data *= envelope * volume
         
-        # Ensure the final audio data is exactly the expected length
-        expected_samples = int(0.5 * self.sample_rate)  # 0.5 seconds
-        if len(wave_data) != expected_samples:
-            if len(wave_data) > expected_samples:
-                wave_data = wave_data[:expected_samples]
-            else:
-                padding = np.zeros(expected_samples - len(wave_data))
-                wave_data = np.concatenate([wave_data, padding])
-        
         return wave_data
     
     def _apply_adsr(self, samples, adsr):
         """Apply ADSR envelope to audio data"""
-        attack_samples = int(adsr['attack'] * self.sample_rate)
-        decay_samples = int(adsr['decay'] * self.sample_rate)
-        release_samples = int(adsr['release'] * self.sample_rate)
+        attack_samples = int(adsr['attack'] * samples)
+        decay_samples = int(adsr['decay'] * samples)
+        release_samples = int(adsr['release'] * samples)
+        sustain_level = adsr['sustain']
+        
         sustain_samples = samples - attack_samples - decay_samples - release_samples
         
         envelope = np.zeros(samples)
         
-        # Attack phase
+        # Attack
         if attack_samples > 0:
             envelope[:attack_samples] = np.linspace(0, 1, attack_samples)
         
-        # Decay phase
+        # Decay
         if decay_samples > 0:
-            start_idx = attack_samples
-            end_idx = start_idx + decay_samples
-            envelope[start_idx:end_idx] = np.linspace(1, adsr['sustain'], decay_samples)
-        
-        # Sustain phase
+            envelope[attack_samples:attack_samples + decay_samples] = np.linspace(1, sustain_level, decay_samples)
+            
+        # Sustain
         if sustain_samples > 0:
-            start_idx = attack_samples + decay_samples
-            end_idx = start_idx + sustain_samples
-            envelope[start_idx:end_idx] = adsr['sustain']
-        
-        # Release phase
+            envelope[attack_samples + decay_samples:attack_samples + decay_samples + sustain_samples] = sustain_level
+            
+        # Release
         if release_samples > 0:
-            start_idx = samples - release_samples
-            envelope[start_idx:] = np.linspace(adsr['sustain'], 0, release_samples)
-        
+            envelope[-release_samples:] = np.linspace(sustain_level, 0, release_samples)
+
         return envelope
-    
+
     def generate_drum_sound(self, drum_type, duration=0.5):
         """Generate drum sounds"""
-        # Use consistent duration for all drum sounds
-        duration = 0.5  # Fixed 0.5 seconds
         samples = int(duration * self.sample_rate)
         t = np.linspace(0, duration, samples, False)
         
         if drum_type == 'kick':
-            # Low frequency thump
-            freq = 60
+            freq = 60 * np.exp(-t * 5)
             wave_data = np.sin(2 * np.pi * freq * t) * np.exp(-t * 10)
         elif drum_type == 'snare':
-            # High frequency noise burst
-            wave_data = np.random.normal(0, 0.3, samples) * np.exp(-t * 15)
+            noise = np.random.normal(0, 0.5, samples) * np.exp(-t * 15)
+            tone = np.sin(2 * np.pi * 180 * t) * np.exp(-t * 10)
+            wave_data = (noise + tone) * 0.5
         elif drum_type == 'hihat':
-            # High frequency noise
-            wave_data = np.random.normal(0, 0.1, samples) * np.exp(-t * 20)
-        elif drum_type == 'crash':
-            # Wide frequency noise
-            wave_data = np.random.normal(0, 0.2, samples) * np.exp(-t * 8)
-        elif drum_type == 'tom1':
-            # Medium frequency
-            freq = 150
-            wave_data = np.sin(2 * np.pi * freq * t) * np.exp(-t * 5)
-        elif drum_type == 'tom2':
-            # Higher frequency
-            freq = 200
-            wave_data = np.sin(2 * np.pi * freq * t) * np.exp(-t * 6)
+            wave_data = np.random.normal(0, 0.1, samples) * np.exp(-t * 25)
         else:
             wave_data = np.zeros(samples)
         
         return wave_data
-    
+
     def play_note(self, instrument, gesture, hand='left'):
         """Play a note based on instrument and gesture"""
         try:
@@ -300,43 +272,23 @@ class MusicGenerator:
                 note_index = note_index % len(inst_config['notes'])
             
             note = inst_config['notes'][note_index]
-            frequency = self.note_to_frequency(note)
-            
-            # Generate simple sine wave with consistent parameters
-            duration = 0.5  # Fixed 0.5 seconds
-            samples = int(self.sample_rate * duration)
-            t = np.linspace(0, duration, samples, False)
-            
-            # Generate base waveform
+            duration = 60 / self.tempo # duration of a beat
+
             if instrument == 'drums':
-                # Simple drum sound
-                if note == 'kick':
-                    wave_data = np.sin(2 * np.pi * 60 * t) * np.exp(-t * 10)
-                elif note == 'snare':
-                    wave_data = np.random.normal(0, 0.3, samples) * np.exp(-t * 15)
-                elif note == 'hihat':
-                    wave_data = np.random.normal(0, 0.1, samples) * np.exp(-t * 20)
-                else:
-                    wave_data = np.sin(2 * np.pi * 200 * t) * np.exp(-t * 8)
+                wave_data = self.generate_drum_sound(note, duration=duration)
             else:
-                # Melodic instruments
-                if inst_config['waveform'] == 'sine':
-                    wave_data = np.sin(2 * np.pi * frequency * t)
-                elif inst_config['waveform'] == 'sawtooth':
-                    wave_data = 2 * (t * frequency - np.floor(t * frequency + 0.5))
-                elif inst_config['waveform'] == 'square':
-                    wave_data = np.sign(np.sin(2 * np.pi * frequency * t))
-                else:
-                    wave_data = np.sin(2 * np.pi * frequency * t)
-            
-            # Apply volume
-            volume = self.volume_left if hand == 'left' else self.volume_right
-            wave_data *= volume
-            
-            # Apply simple envelope to avoid clicks
-            envelope = np.exp(-t * 2)  # Simple exponential decay
-            wave_data *= envelope
-            
+                frequency = self.note_to_frequency(note)
+                volume = self.volume_left if hand == 'left' else self.volume_right
+                wave_data = self.generate_tone(frequency, duration, inst_config['waveform'], inst_config['adsr'], volume)
+
+            # Apply effects if enabled
+            if self.effects['reverb']:
+                wave_data = self._apply_reverb(wave_data)
+            if self.effects['delay']:
+                wave_data = self._apply_delay(wave_data)
+            if self.effects['distortion']:
+                wave_data = self._apply_distortion(wave_data)
+
             # Convert to stereo
             if hand == 'left':
                 stereo_data = np.column_stack([wave_data, np.zeros_like(wave_data)])
@@ -365,18 +317,17 @@ class MusicGenerator:
             print(f"Error playing note: {e}")
             return None
     
-    def _apply_reverb(self, audio_data, room_size=0.3):
-        """Apply simple reverb effect"""
-        # Simple delay-based reverb
-        delay_samples = int(0.1 * self.sample_rate)
+    def _apply_reverb(self, audio_data, room_size=0.3, decay=0.5):
+        """Apply a more realistic reverb effect."""
+        delay_samples = int(0.05 * self.sample_rate) # 50ms delay
         reverb_data = np.zeros_like(audio_data)
         
         for i in range(delay_samples, len(audio_data)):
-            reverb_data[i] = audio_data[i] + room_size * reverb_data[i - delay_samples]
+            reverb_data[i] = audio_data[i] + decay * reverb_data[i - delay_samples]
         
-        return reverb_data
-    
-    def _apply_delay(self, audio_data, delay_time=0.25, feedback=0.3):
+        return (audio_data + reverb_data * room_size) / (1 + room_size)
+
+    def _apply_delay(self, audio_data, delay_time=0.25, feedback=0.4):
         """Apply delay effect"""
         delay_samples = int(delay_time * self.sample_rate)
         delayed_data = np.zeros_like(audio_data)
@@ -386,11 +337,10 @@ class MusicGenerator:
         
         return delayed_data
     
-    def _apply_distortion(self, audio_data, gain=2.0):
+    def _apply_distortion(self, audio_data, gain=10.0):
         """Apply distortion effect"""
-        # Simple soft clipping distortion
-        return np.tanh(audio_data * gain) / gain
-    
+        return np.tanh(audio_data * gain) / np.tanh(gain)
+
     def process_gesture(self, hand_info):
         """Process gesture information and generate music"""
         music_events = []
@@ -436,13 +386,16 @@ class MusicGenerator:
             print("No audio data to save")
             return None
         
+        output_dir = "recordings"
+        os.makedirs(output_dir, exist_ok=True)
+
         # Combine all audio data
         combined_audio = np.concatenate(self.recording_data, axis=0)
         
         # Save audio file
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        audio_filename = f"session_{timestamp}.wav"
-        metadata_filename = f"session_{timestamp}.json"
+        audio_filename = os.path.join(output_dir, f"session_{timestamp}.wav")
+        metadata_filename = os.path.join(output_dir, f"session_{timestamp}.json")
         
         self._save_wav_file(combined_audio, audio_filename)
         self._save_metadata(metadata_filename)
@@ -465,7 +418,10 @@ class MusicGenerator:
             wav_file.writeframes(audio_data_16bit.tobytes())
     
     def _save_metadata(self, filename):
-        """Save session metadata as JSON"""
+        """Save session metadata as JSON file.
+        This metadata is crucial for the analysis dashboard, providing insights into the user's performance.
+        It tracks every gesture, note, and instrument used, which is then aggregated to show usage statistics.
+        """
         with open(filename, 'w') as f:
             json.dump(self.session_metadata, f, indent=2)
     
@@ -481,7 +437,7 @@ class MusicGenerator:
             return False
     
     def get_session_stats(self):
-        """Get statistics about the current session"""
+        """Get statistics about the current session based on the recorded metadata."""
         if not self.session_metadata:
             return {}
         
@@ -500,9 +456,12 @@ class MusicGenerator:
         
         # Calculate tempo
         if len(self.session_metadata) > 1:
-            time_span = self.session_metadata[-1]['timestamp'] - self.session_metadata[0]['timestamp']
-            events_per_second = len(self.session_metadata) / time_span
-            estimated_bpm = events_per_second * 60
+            time_diffs = np.diff([e['timestamp'] for e in self.session_metadata])
+            avg_time_diff = np.mean(time_diffs)
+            if avg_time_diff > 0:
+                estimated_bpm = 60 / avg_time_diff
+            else:
+                estimated_bpm = 0
         else:
             estimated_bpm = 0
         
@@ -602,6 +561,7 @@ if __name__ == "__main__":
     # Test recording
     generator.start_recording()
     time.sleep(2)
+    generator.process_gesture(test_hand_info) # Add some data to record
     generator.stop_recording()
     
     # Get stats

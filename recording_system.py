@@ -44,6 +44,8 @@ class SessionRecorder:
         if self.is_recording:
             return False
         
+        if session_name:
+            session_name = os.path.basename(session_name)
         self.session_id = session_name or f"session_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         self.start_time = time.time()
         self.is_recording = True
@@ -260,7 +262,7 @@ class SessionPlayer:
     """Session playback system with synchronized audio, video, and gesture visualization"""
     
     def __init__(self, session_file: str):
-        self.session_file = session_file
+        self.session_file = os.path.basename(session_file)
         self.session_data = None
         self.is_playing = False
         self.current_time = 0
@@ -483,6 +485,7 @@ class SessionManager:
         if session_id not in self.sessions:
             return False
         
+        session_id = os.path.basename(session_id)
         try:
             # Delete all session files
             for filename in os.listdir(self.sessions_dir):
@@ -516,7 +519,20 @@ class SessionManager:
             csv_data = "timestamp,hand,instrument,gesture,note\n"
             for event in music_events:
                 data = event.get('data', {})
-                csv_data += f"{event['timestamp']},{data.get('hand', '')},{data.get('instrument', '')},{data.get('gesture', '')},{data.get('note', '')}\n"
+                
+                def sanitize_csv_value(value):
+                    value = str(value)
+                    if value.startswith(('=', '+', '-', '@')):
+                        return "'" + value
+                    return value
+
+                timestamp = sanitize_csv_value(event['timestamp'])
+                hand = sanitize_csv_value(data.get('hand', ''))
+                instrument = sanitize_csv_value(data.get('instrument', ''))
+                gesture = sanitize_csv_value(data.get('gesture', ''))
+                note = sanitize_csv_value(data.get('note', ''))
+
+                csv_data += f"{timestamp},{hand},{instrument},{gesture},{note}\n"
             
             return csv_data
         

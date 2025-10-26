@@ -1,0 +1,482 @@
+[
+  {
+    "timestamp": 1761462390.055259,
+    "instrument": "piano",
+    "gesture": "open_palm",
+    "hand": "right",
+    "note": "E4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462390.2723398,
+    "instrument": "piano",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "E4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462390.3886092,
+    "instrument": "piano",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "E4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462390.5708282,
+    "instrument": "piano",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "E4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462390.7385044,
+    "instrument": "piano",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "E4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462390.8907084,
+    "instrument": "piano",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "E4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462391.0538416,
+    "instrument": "piano",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "E4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462391.2202916,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462391.402056,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462391.5771258,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462391.7391908,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462391.9347305,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462392.107155,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462392.2927957,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462392.525616,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462392.525616,
+    "instrument": "piano",
+    "gesture": "thumbs_up",
+    "hand": "right",
+    "note": "F4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462392.656069,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462392.6570933,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "right",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462392.823926,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462392.8249211,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "right",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462392.9804552,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462392.9804552,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "right",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462393.1252458,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462393.1261497,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "right",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462393.2930646,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462393.294056,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "right",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462393.450441,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462393.4514456,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "right",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462393.613984,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462393.6150446,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "right",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462393.7738845,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462393.7738845,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "right",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462393.9318368,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462393.9329145,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "right",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462394.0973284,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462394.0973284,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "right",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462394.246457,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462394.2474535,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "right",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462394.3936498,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462394.3936498,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "right",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462394.5671604,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462394.56857,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "right",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462394.742558,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462394.743551,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "right",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462394.8972666,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462394.8979025,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "right",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462395.0598319,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462395.0598319,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "right",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462395.2346277,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462395.2346277,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "right",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462395.4123514,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462395.4123514,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "right",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462395.5616367,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462395.562737,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "right",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462395.7275677,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462395.7275677,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "right",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462395.8833022,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462395.8833022,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "right",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462396.0498273,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "left",
+    "note": "D4",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761462396.0498273,
+    "instrument": "piano",
+    "gesture": "fist",
+    "hand": "right",
+    "note": "D4",
+    "duration": 0.5
+  }
+]

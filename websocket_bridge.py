@@ -6,6 +6,7 @@ import time
 import queue
 from typing import Set, Dict, Any
 import logging
+import os
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -29,7 +30,7 @@ class WebSocketBridge:
         self.music_handlers = []
         self.control_handlers = []
         
-    async def register_client(self, websocket, path):
+    async def register_client(self, websocket):
         """Register a new WebSocket client"""
         self.clients.add(websocket)
         client_address = websocket.remote_address
@@ -63,11 +64,11 @@ class WebSocketBridge:
             message_type = data.get('type', 'unknown')
             
             if message_type == 'gesture_data':
-                await self.handle_gesture_data(data)
-            elif message_type == 'music_event':
-                await self.handle_music_event(data)
+                for handler in self.gesture_handlers:
+                    handler(data.get('data', {}))
             elif message_type == 'control_command':
-                await self.handle_control_command(data)
+                for handler in self.control_handlers:
+                    handler(data.get('data', {}))
             elif message_type == 'ping':
                 await self.send_pong(websocket)
             else:
@@ -77,71 +78,6 @@ class WebSocketBridge:
             logger.error("Invalid JSON message received")
         except Exception as e:
             logger.error(f"Error handling message: {e}")
-    
-    async def handle_gesture_data(self, data):
-        """Handle gesture detection data"""
-        gesture_data = data.get('data', {})
-        self.gesture_queue.put(gesture_data)
-        
-        # Notify all clients about gesture data
-        await self.broadcast_to_clients({
-            'type': 'gesture_update',
-            'data': gesture_data,
-            'timestamp': time.time()
-        })
-        
-        # Call registered gesture handlers
-        for handler in self.gesture_handlers:
-            try:
-                handler(gesture_data)
-            except Exception as e:
-                logger.error(f"Error in gesture handler: {e}")
-    
-    async def handle_music_event(self, data):
-        """Handle music generation events"""
-        music_data = data.get('data', {})
-        self.music_queue.put(music_data)
-        
-        # Notify all clients about music events
-        await self.broadcast_to_clients({
-            'type': 'music_update',
-            'data': music_data,
-            'timestamp': time.time()
-        })
-        
-        # Call registered music handlers
-        for handler in self.music_handlers:
-            try:
-                handler(music_data)
-            except Exception as e:
-                logger.error(f"Error in music handler: {e}")
-    
-    async def handle_control_command(self, data):
-        """Handle control commands"""
-        control_data = data.get('data', {})
-        self.control_queue.put(control_data)
-        
-        # Notify all clients about control changes
-        await self.broadcast_to_clients({
-            'type': 'control_update',
-            'data': control_data,
-            'timestamp': time.time()
-        })
-        
-        # Call registered control handlers
-        for handler in self.control_handlers:
-            try:
-                handler(control_data)
-            except Exception as e:
-                logger.error(f"Error in control handler: {e}")
-    
-    async def send_pong(self, websocket):
-        """Send pong response to ping"""
-        pong_msg = {
-            'type': 'pong',
-            'timestamp': time.time()
-        }
-        await websocket.send(json.dumps(pong_msg))
     
     async def broadcast_to_clients(self, message: Dict[Any, Any]):
         """Broadcast message to all connected clients"""
@@ -175,31 +111,13 @@ class WebSocketBridge:
         """Add a control command handler"""
         self.control_handlers.append(handler)
     
-    def get_gesture_data(self, timeout=0.1):
-        """Get latest gesture data from queue"""
-        try:
-            return self.gesture_queue.get(timeout=timeout)
-        except queue.Empty:
-            return None
-    
-    def get_music_data(self, timeout=0.1):
-        """Get latest music data from queue"""
-        try:
-            return self.music_queue.get(timeout=timeout)
-        except queue.Empty:
-            return None
-    
-    def get_control_data(self, timeout=0.1):
-        """Get latest control data from queue"""
-        try:
-            return self.control_queue.get(timeout=timeout)
-        except queue.Empty:
-            return None
-    
     async def start_server(self):
         """Start the WebSocket server"""
+        async def handler(websocket):
+            await self.register_client(websocket)
+
         self.server = await websockets.serve(
-            self.register_client,
+            handler,
             self.host,
             self.port,
             ping_interval=20,
@@ -208,7 +126,6 @@ class WebSocketBridge:
         self.is_running = True
         logger.info(f"WebSocket server started on ws://{self.host}:{self.port}")
         
-        # Keep server running
         await self.server.wait_closed()
     
     def start_server_thread(self):
@@ -226,84 +143,38 @@ class WebSocketBridge:
             self.server.close()
             self.is_running = False
             logger.info("WebSocket server stopped")
-    
-    def get_client_count(self):
-        """Get number of connected clients"""
-        return len(self.clients)
-    
-    def get_server_status(self):
-        """Get server status information"""
-        return {
-            'is_running': self.is_running,
-            'client_count': len(self.clients),
-            'host': self.host,
-            'port': self.port,
-            'queue_sizes': {
-                'gesture': self.gesture_queue.qsize(),
-                'music': self.music_queue.qsize(),
-                'control': self.control_queue.qsize()
-            }
-        }
 
 class GestureBeatsBridge:
     """Main bridge class that integrates gesture detection, music generation, and WebSocket communication"""
     
     def __init__(self):
         self.websocket_bridge = WebSocketBridge()
-        self.gesture_detector = None
         self.music_generator = None
         self.is_running = False
         
     def initialize_components(self):
-        """Initialize gesture detector and music generator"""
+        """Initialize music generator"""
         try:
-            from gesture import GestureDetector
             from music_generator import MusicGenerator
-            
-            self.gesture_detector = GestureDetector()
             self.music_generator = MusicGenerator()
-            
-            # Set up handlers
             self.websocket_bridge.add_gesture_handler(self.handle_gesture_data)
-            self.websocket_bridge.add_music_handler(self.handle_music_event)
             self.websocket_bridge.add_control_handler(self.handle_control_command)
-            
             logger.info("Components initialized successfully")
             return True
-            
         except ImportError as e:
             logger.error(f"Failed to import required modules: {e}")
             return False
         except Exception as e:
             logger.error(f"Failed to initialize components: {e}")
             return False
-    
+
     def handle_gesture_data(self, gesture_data):
         """Handle incoming gesture data"""
         try:
-            # Process gesture data with music generator
             if self.music_generator:
-                music_events = self.music_generator.process_gesture(gesture_data)
-                
-                # Send music events to WebSocket clients
-                for event in music_events:
-                    asyncio.create_task(self.websocket_bridge.broadcast_to_clients({
-                        'type': 'music_event',
-                        'data': event,
-                        'timestamp': time.time()
-                    }))
-                    
+                self.music_generator.process_gesture(gesture_data)
         except Exception as e:
             logger.error(f"Error handling gesture data: {e}")
-    
-    def handle_music_event(self, music_data):
-        """Handle music generation events"""
-        try:
-            # Process music events
-            logger.debug(f"Music event: {music_data}")
-            
-        except Exception as e:
-            logger.error(f"Error handling music event: {e}")
     
     def handle_control_command(self, control_data):
         """Handle control commands"""
@@ -341,12 +212,12 @@ class GestureBeatsBridge:
             elif command == 'stop_recording':
                 if self.music_generator:
                     result = self.music_generator.stop_recording()
-                    # Broadcast recording result
-                    asyncio.create_task(self.websocket_bridge.broadcast_to_clients({
-                        'type': 'recording_result',
-                        'data': result,
-                        'timestamp': time.time()
-                    }))
+                    if result:
+                        audio_filename, _ = result
+                        stats = self.music_generator.get_session_stats()
+                        stats_filename = audio_filename.replace('.wav', '_stats.json')
+                        with open(stats_filename, 'w') as f:
+                            json.dump(stats, f, indent=2)
             
             logger.info(f"Control command executed: {command}")
             
@@ -358,7 +229,6 @@ class GestureBeatsBridge:
         if not self.initialize_components():
             return False
         
-        # Start WebSocket server
         self.websocket_bridge.start_server_thread()
         self.is_running = True
         
@@ -374,34 +244,15 @@ class GestureBeatsBridge:
             self.music_generator.cleanup()
         
         logger.info("GestureBeats Bridge stopped")
-    
-    def get_status(self):
-        """Get system status"""
-        return {
-            'is_running': self.is_running,
-            'websocket_status': self.websocket_bridge.get_server_status(),
-            'components': {
-                'gesture_detector': self.gesture_detector is not None,
-                'music_generator': self.music_generator is not None
-            }
-        }
 
-# Example usage and testing
 if __name__ == "__main__":
     bridge = GestureBeatsBridge()
     
     try:
         if bridge.start():
             print("Bridge started successfully!")
-            print(f"Status: {bridge.get_status()}")
-            
-            # Keep running until interrupted
             while True:
                 time.sleep(1)
-                
-        else:
-            print("Failed to start bridge")
-            
     except KeyboardInterrupt:
         print("\nShutting down...")
         bridge.stop()

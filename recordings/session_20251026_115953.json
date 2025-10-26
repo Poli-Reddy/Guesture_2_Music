@@ -1,0 +1,274 @@
+[
+  {
+    "timestamp": 1761460188.1754496,
+    "instrument": "drums",
+    "gesture": "thumbs_up",
+    "hand": "left",
+    "note": "crash",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460188.2800133,
+    "instrument": "drums",
+    "gesture": "thumbs_up",
+    "hand": "left",
+    "note": "crash",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460188.3860617,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460188.494372,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460188.6029959,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460188.7090018,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460188.8053393,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460188.8987834,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460189.0061226,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460189.099553,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460189.1962056,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460189.3073404,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460189.4138935,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460189.510144,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460189.617894,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460189.7271593,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460189.8361437,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460189.9441426,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460190.0534701,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460190.1699116,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460190.2785697,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460190.3878963,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460190.4926136,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460190.6041799,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460190.7209957,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460190.8352547,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460190.9461493,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460191.0528076,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460191.1572237,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460191.2662282,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460191.370811,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460191.4664125,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460191.574663,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  },
+  {
+    "timestamp": 1761460191.6809888,
+    "instrument": "drums",
+    "gesture": "open_palm",
+    "hand": "left",
+    "note": "hihat",
+    "duration": 0.5
+  }
+]
