@@ -10,7 +10,6 @@ asyncio-mqtt>=0.13.0
 
 # Audio processing
 pyaudio>=0.2.11
-wave
 scipy>=1.11.0
 
 # Data visualization
