@@ -1,8 +1,8 @@
-# 🎵 GestureBeats Studio 🎵
+#  GestureBeats Studio 
 
 GestureBeats Studio is a Python-based application that allows you to create music in real-time using hand gestures. It captures your hand movements through a webcam, recognizes predefined gestures, and translates them into musical notes and commands. The application features a web-based interface for easy control and visualization.
 
-## ✨ Features
+##  Features
 
 *   **Real-time Gesture Recognition:** Utilizes Google's MediaPipe library to detect and classify hand gestures from a live camera feed.
 *   **Multi-instrument Music Generation:** Supports various instruments for both left and right hands, including piano, guitar, drums, violin, flute, and saxophone.
@@ -11,7 +11,7 @@ GestureBeats Studio is a Python-based application that allows you to create musi
 *   **Session Analysis:** View statistics and visualizations of your performance, including gesture frequency and complexity.
 *   **WebSocket Bridge:** A WebSocket bridge enables communication between the gesture detection backend and the frontend.
 
-## 🛠️ Setup and Installation
+##  Setup and Installation
 
 ### 1. Clone the Repository
 
@@ -44,7 +44,7 @@ A quick test for your audio setup can be run with:
 python test_audio.py
 ```
 
-## 🚀 How to Run
+##  How to Run
 
 ### Accessing the Web Interface (UI)
 
